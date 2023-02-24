@@ -2,8 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
-const mg = require('nodemailer-mailgun-transport');
+// const nodemailer = require('nodemailer');
+// const mg = require('nodemailer-mailgun-transport');
 require('dotenv').config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
@@ -17,11 +17,11 @@ app.use(express.json());
 
 
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.twtll.mongodb.net/?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.zvgiq1x.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 
-function sendBookingEmail(booking) {
+/* function sendBookingEmail(booking) {
     const { email, treatment, appointmentDate, slot } = booking;
 
     const auth = {
@@ -44,8 +44,8 @@ function sendBookingEmail(booking) {
     // });
       console.log('sending email', email)
     transporter.sendMail({
-        from: "jhankar.mahbub2@gmail.com", // verified sender email
-        to: email || 'jhankar.mahbub2@gmail.com', // recipient email
+        from: "syedahammad36@gmail.com", // verified sender email
+        to: email || 'syedahammad36@gmail.com@gmail.com', // recipient email
         subject: `Your appointment for ${treatment} is confirmed`, // Subject line
         text: "Hello world!", // plain text body
         html: `
@@ -64,7 +64,7 @@ function sendBookingEmail(booking) {
             console.log('Email sent: ' + info);
         }
     });
-}
+} */
 
 function verifyJWT(req, res, next) {
 
@@ -226,7 +226,7 @@ async function run() {
 
             const result = await bookingsCollection.insertOne(booking);
             // send email about appointment confirmation 
-            sendBookingEmail(booking)
+            // sendBookingEmail(booking)
             res.send(result);
         });
 
@@ -287,8 +287,14 @@ async function run() {
         })
 
         app.post('/users', async (req, res) => {
-            const user = req.body;
+            const user = {...req.body, role: "patient"};
             console.log(user);
+            const query = {role: "admin"}
+            const userRole = await usersCollection.findOne(query);
+            if(userRole === null){
+                user.role = "admin";
+            }
+            console.log(user)
             // TODO: make sure you do not enter duplicate user email
             // only insert users if the user doesn't exist in the database
             const result = await usersCollection.insertOne(user);
